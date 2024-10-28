@@ -1,50 +1,100 @@
 // Build a BlackJack Game
 
 // variables representing two cards 
-let firstCard = 10;
-let secondCard = 4;
+let firstCard;
+let secondCard;
 // player'hand
-const cards = [];
-cards[0] = firstCard;
-cards[1] = secondCard;
-//challenge #1
-//create a new variable and set it to the sum of the two cards 
+let cards = [];
+let scores = [];
+if (localStorage.scores) {
+    scores = JSON.parse(localStorage.scores);
+} else {
+    scores = [];
+    localStorage.scores = JSON.stringify(scores);
+}
 let sum = 0;
 let hasBlackJack = false;
-let isAlive = true; 
+let isAlive = false; 
 let message = "";
+let player = false;
 let messageEl = document.getElementById("message-el");
 let sumEl = document.getElementById("sum-el");
 let cardsEl = document.getElementById("cards-el");
-
-//chalenge #2 
-// code the statements below based on the conditions shown in blackjack.png from the images folder
-// your output should work in the browser's console based on changing the values assigned to the cards
-//starter code
-if (sum < 21) {
-    message = "Do you want to draw a new card? 🙂";
-} else if (sum == 21) {
-    hasBlackJack = true;
-    message = "Wohoo! You've got Blackjack! 🥳";
-} else {
-    message = "You're out of the game! 😭";
-    isAlive = false;
-}
+let scoresEl = document.getElementById("previous-scores");
+let playerEL = document.getElementById("player-el");
 
 function renderGame() {
-    messageEl.innerHTML = message;
-    for (let i = 0; i < cards.length; i++) {
-        cardsEl.textContent += cards[i];
+    sum = 0;
+    cardsEl.textContent = "";
+    if (isAlive) {
+        console.log(cards);
+        for (let i = 0; i < cards.length; i++) {
+            cardsEl.textContent += cards[i] + ", ";
+            sum += cards[i];
+        }
     }
+
+    if (sum < 21) {
+        message = "Do you want to draw a new card? 🙂";
+    } else if (sum == 21) {
+        hasBlackJack = true;
+        recordScore(sum);
+        message = "Wohoo! You've got Blackjack! 🥳";
+    } else {
+        isAlive = false;
+        recordScore(sum);
+        message = "You're out of the game! 😭";
+    }
+    
+    messageEl.innerHTML = message;
     sumEl.innerHTML = "Sum: " + sum;
+    scoresEl.innerHTML = "Previous Scores: " + scores;
+} 
+
+
+function recordScore(score) {
+    if (scores.length < 4) {
+        scores.push(score);
+    } else {
+        scores.shift();
+        scores.push(sum);
+    }
+
+    localStorage.scores = JSON.stringify(scores);
 }
 
+
 function newCard() {
-    let card = getRandomCard();
-    sum += cards[i];
-    cards.push(card);
+    if (isAlive) {
+        let card = getRandomCard();
+        cards.push(card);
+        renderGame();
+    }
+}
+
+
+function startGame() {
+    isAlive = true;
+    cards = [];
+    if (!player) {
+        playerEL.innerHTML = "Player: " + prompt("What is your name?")
+        player = true;
+    }
+    firstCard = getRandomCard();
+    secondCard = getRandomCard();
+    cards.push(firstCard);
+    cards.push(secondCard);
     renderGame();
 }
 
-console.log(message);
-console.log(cards)
+
+function getRandomCard() {
+    let randint = Math.floor(Math.random() * 13) + 1
+    if (randint == 1) {
+        return 11;
+    } else if (randint > 9) {
+        return 10;
+    } else {
+        return randint;
+    }
+}
